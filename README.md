@@ -185,6 +185,9 @@ fi
 
 ## Release Notes
 
+### 0.0.40
+- Support listing lsp references
+
 ### 0.0.39
 - Add option to set a shell path to enable running with a non-default shell
 - Fixed an issue with wrong env var names in Windows scripts

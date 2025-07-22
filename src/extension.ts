@@ -795,7 +795,6 @@ async function executeTerminalCommand(cmd: string) {
         }
     }
 
-    // Handle LSP references command specially
     if (cmd === "findLspReferences") {
         CFG.lastCommand = cmd; // Track this command for resume functionality
         await findLspReferences();
