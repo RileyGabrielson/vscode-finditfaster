@@ -24,7 +24,7 @@
     "search",
     "within"
   ],
-  "version": "0.0.39",
+  "version": "0.0.40",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -36,7 +36,8 @@
     "onCommand:find-it-faster.findFilesWithType",
     "onCommand:find-it-faster.findWithinFiles",
     "onCommand:find-it-faster.findWithinFilesWithType",
-    "onCommand:find-it-faster.listSearchLocations"
+    "onCommand:find-it-faster.listSearchLocations",
+    "onCommand:find-it-faster.findLspReferences"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -64,6 +65,10 @@
       {
         "command": "find-it-faster.resumeSearch",
         "title": "Find It Faster: resume last search"
+      },
+      {
+        "command": "find-it-faster.findLspReferences",
+        "title": "Find It Faster: find LSP references"
       }
     ],
     "keybindings": [
@@ -81,6 +86,11 @@
         "command": "find-it-faster.findWithinFilesWithType",
         "mac": "ctrl+cmd+shift+u",
         "linux": "ctrl+shift+alt+u"
+      },
+      {
+        "command": "find-it-faster.findLspReferences",
+        "mac": "cmd+shift+r",
+        "linux": "ctrl+shift+r"
       }
     ],
     "configuration": {

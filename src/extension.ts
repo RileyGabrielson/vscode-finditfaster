@@ -75,6 +75,12 @@ const commands: { [key: string]: Command } = {
         preRunCallback: undefined,
         postRunCallback: undefined,
     },
+    findLspReferences: {
+        script: 'find_lsp_references', // This will be handled specially in executeTerminalCommand
+        uri: undefined,
+        preRunCallback: undefined,
+        postRunCallback: undefined,
+    },
 };
 
 type WhenCondition = 'always' | 'never' | 'noWorkspaceOnly';
@@ -183,6 +189,7 @@ interface Config {
     selectionFile: string,
     lastQueryFile: string,
     lastPosFile: string,
+    lastLspReferences: string[],
     hideTerminalAfterSuccess: boolean,
     hideTerminalAfterFail: boolean,
     clearTerminalAfterUse: boolean,
@@ -227,6 +234,7 @@ const CFG: Config = {
     selectionFile: '',
     lastQueryFile: '',
     lastPosFile: '',
+    lastLspReferences: [],
     hideTerminalAfterSuccess: false,
     hideTerminalAfterFail: false,
     clearTerminalAfterUse: false,
@@ -269,6 +277,7 @@ function setupConfig(context: vscode.ExtensionContext) {
     commands.findWithinFilesWithType.uri = localScript(commands.findWithinFiles.script);
     commands.listSearchLocations.uri = localScript(commands.listSearchLocations.script);
     commands.flightCheck.uri = localScript(commands.flightCheck.script);
+    commands.findLspReferences.uri = localScript(commands.findLspReferences.script);
 }
 
 /** Register the commands we defined with VS Code so users have access to them */
@@ -695,6 +704,7 @@ function createTerminal() {
             LAST_QUERY_FILE: CFG.lastQueryFile,
             LAST_POS_FILE: CFG.lastPosFile,
             EXPLAIN_FILE: path.join(CFG.tempDir, 'paths_explain'),
+            TEMP_DIR: CFG.tempDir,
             BAT_THEME: CFG.batTheme,
             FUZZ_RG_QUERY: CFG.fuzzRipgrepQuery ? '1' : '0',
             /* eslint-enable @typescript-eslint/naming-convention */
@@ -785,6 +795,13 @@ async function executeTerminalCommand(cmd: string) {
         }
     }
 
+    // Handle LSP references command specially
+    if (cmd === "findLspReferences") {
+        CFG.lastCommand = cmd; // Track this command for resume functionality
+        await findLspReferences();
+        return;
+    }
+
     if (cmd === "resumeSearch") {
         // Run the last-run command again
         if (os.platform() === 'win32') {
@@ -795,6 +812,23 @@ async function executeTerminalCommand(cmd: string) {
             vscode.window.showErrorMessage('Cannot resume the last search because no search was run yet.');
             return;
         }
+        
+        // Handle special case for LSP references
+        if (CFG.lastCommand === "findLspReferences") {
+            if (CFG.lastLspReferences.length === 0) {
+                vscode.window.showErrorMessage('No previous LSP references to resume.');
+                return;
+            }
+            
+            // Write the stored references to a temporary file for the shell script to read
+            const referencesFile = path.join(CFG.tempDir, 'lsp_references');
+            fs.writeFileSync(referencesFile, CFG.lastLspReferences.join('\n'));
+            
+            // Use the normal command execution flow
+            await executeLspReferencesCommand();
+            return;
+        }
+        
         commands["resumeSearch"].uri = commands[CFG.lastCommand].uri;
         commands["resumeSearch"].preRunCallback = commands[CFG.lastCommand].preRunCallback;
         commands["resumeSearch"].postRunCallback = commands[CFG.lastCommand].postRunCallback;
@@ -826,6 +860,89 @@ async function executeTerminalCommand(cmd: string) {
         const postRunCallback = commands[cmd].postRunCallback;
         if (postRunCallback !== undefined) { postRunCallback(); }
     }
+}
+
+async function findLspReferences() {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+        vscode.window.showErrorMessage('No active editor found');
+        return;
+    }
+
+    const position = editor.selection.active;
+    const document = editor.document;
+    
+    try {
+        const references = await vscode.commands.executeCommand(
+            'vscode.executeReferenceProvider',
+            document.uri,
+            position
+        ) as vscode.Location[];
+        
+        if (references && references.length > 0) {
+            // Format references for fzf-like display
+            const referenceLines: string[] = [];
+            
+            for (const ref of references) {
+                const file = ref.uri.fsPath;
+                const range = ref.range;
+                const line = range.start.line + 1;
+                const char = range.start.character + 1;
+                
+                // Get the text from the referenced document
+                let text = '';
+                try {
+                    const refDocument = await vscode.workspace.openTextDocument(ref.uri);
+                    text = refDocument.getText(range);
+                } catch (docError) {
+                    text = '<unable to read text>';
+                }
+                
+                referenceLines.push(`${file}:${line}:${char}:${text}`);
+            }
+            
+            // Store the references for potential resume
+            CFG.lastLspReferences = referenceLines;
+            
+            // Write references to a temporary file for the shell script to read
+            const referencesFile = path.join(CFG.tempDir, 'lsp_references');
+            fs.writeFileSync(referencesFile, referenceLines.join('\n'));
+            
+            // Now use the normal command execution flow
+            await executeLspReferencesCommand();
+            
+        } else {
+            vscode.window.showInformationMessage('No references found for the selected symbol');
+        }
+    } catch (error) {
+        vscode.window.showErrorMessage(`Error finding references: ${error}`);
+    }
+}
+
+async function executeLspReferencesCommand() {
+    if (!CFG.flightCheckPassed && !CFG.disableStartupChecks) {
+        if (!reinitialize()) {
+            return;
+        }
+    }
+
+    if (!term || term.exitStatus !== undefined) {
+        createTerminal();
+        if (os.platform() !== 'win32') {
+            term.sendText('bash');
+            term.sendText('export PS1="::: Terminal allocated for FindItFaster. Do not use. ::: "; clear');
+        }
+    }
+
+    assert(commands.findLspReferences.uri);
+    term.sendText(getCommandString(commands.findLspReferences, false, false));
+    if (CFG.showMaximizedTerminal) {
+        vscode.commands.executeCommand('workbench.action.toggleMaximizedPanel');
+    }
+    if (CFG.restoreFocusTerminal) {
+        previousActiveTerminal = vscode.window.activeTerminal ?? null;
+    }
+    term.show();
 }
 
 function envVarToString(name: string, value: string) {
