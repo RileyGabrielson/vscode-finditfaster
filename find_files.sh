@@ -50,6 +50,7 @@ callfzf () {
         ${PATHS[@]+"${PATHS[@]}"} \
         2> /dev/null \
     | fzf \
+        --keep-right \
         --cycle \
         --multi \
         --history $LAST_QUERY_FILE \

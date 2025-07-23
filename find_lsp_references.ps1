@@ -32,9 +32,9 @@ if ((Get-Item $REFERENCES_FILE).Length -eq 0) {
     exit 1
 }
 
-$PREVIEW_ENABLED=VGet "env:FIND_WITHIN_FILES_PREVIEW_ENABLED" 1
-$PREVIEW_COMMAND=VGet "env:FIND_WITHIN_FILES_PREVIEW_COMMAND"  'bat --decorations=always --color=always {1} --highlight-line {2} --style=header,grid'
-$PREVIEW_WINDOW=VGet "env:FIND_WITHIN_FILES_PREVIEW_WINDOW_CONFIG" 'right:border-left:50%:+{2}+3/3:~3'
+$PREVIEW_ENABLED=VGet "env:FIND_LSP_REFERENCES_PREVIEW_ENABLED" 1
+$PREVIEW_COMMAND=VGet "env:FIND_LSP_REFERENCES_PREVIEW_COMMAND"  'bat --decorations=always --color=always {1} --highlight-line {2} --style=header,grid'
+$PREVIEW_WINDOW=VGet "env:FIND_LSP_REFERENCES_PREVIEW_WINDOW_CONFIG" 'right:border-left:50%:+{2}+3/3:~3'
 
 $fzf_command = "fzf --cycle --delimiter :"
 if ( $PREVIEW_ENABLED -eq 1){

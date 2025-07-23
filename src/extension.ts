@@ -181,6 +181,9 @@ interface Config {
     findWithinFilesPreviewEnabled: boolean,
     findWithinFilesPreviewCommand: string,
     findWithinFilesPreviewWindowConfig: string,
+    findLspReferencesPreviewEnabled: boolean,
+    findLspReferencesPreviewCommand: string,
+    findLspReferencesPreviewWindowConfig: string,
     findWithinFilesFilter: Set<string>,
     workspaceSettings: {
         folders: string[],
@@ -226,6 +229,9 @@ const CFG: Config = {
     findWithinFilesPreviewEnabled: true,
     findWithinFilesPreviewCommand: '',
     findWithinFilesPreviewWindowConfig: '',
+    findLspReferencesPreviewEnabled: true,
+    findLspReferencesPreviewCommand: '',
+    findLspReferencesPreviewWindowConfig: '',
     findWithinFilesFilter: new Set(),
     workspaceSettings: {
         folders: [],
@@ -349,6 +355,9 @@ function updateConfigWithUserSettings() {
     CFG.findWithinFilesPreviewEnabled = getCFG('findWithinFiles.showPreview');
     CFG.findWithinFilesPreviewCommand = getCFG('findWithinFiles.previewCommand');
     CFG.findWithinFilesPreviewWindowConfig = getCFG('findWithinFiles.previewWindowConfig');
+    CFG.findLspReferencesPreviewEnabled = getCFG('findLspReferences.showPreview');
+    CFG.findLspReferencesPreviewCommand = getCFG('findLspReferences.previewCommand');
+    CFG.findLspReferencesPreviewWindowConfig = getCFG('findLspReferences.previewWindowConfig');
     CFG.fuzzRipgrepQuery = getCFG('findWithinFiles.fuzzRipgrepQuery');
     CFG.restoreFocusTerminal = getCFG('general.restoreFocusTerminal');
     CFG.useTerminalInEditor = getCFG('general.useTerminalInEditor');
@@ -697,6 +706,9 @@ function createTerminal() {
             FIND_WITHIN_FILES_PREVIEW_ENABLED: CFG.findWithinFilesPreviewEnabled ? '1' : '0',
             FIND_WITHIN_FILES_PREVIEW_COMMAND: CFG.findWithinFilesPreviewCommand,
             FIND_WITHIN_FILES_PREVIEW_WINDOW_CONFIG: CFG.findWithinFilesPreviewWindowConfig,
+            FIND_LSP_REFERENCES_PREVIEW_ENABLED: CFG.findLspReferencesPreviewEnabled ? '1' : '0',
+            FIND_LSP_REFERENCES_PREVIEW_COMMAND: CFG.findLspReferencesPreviewCommand,
+            FIND_LSP_REFERENCES_PREVIEW_WINDOW_CONFIG: CFG.findLspReferencesPreviewWindowConfig,
             USE_GITIGNORE: CFG.useGitIgnoreExcludes ? '1' : '0',
             GLOBS: CFG.useWorkspaceSearchExcludes ? getIgnoreString() : '',
             CANARY_FILE: CFG.canaryFile,

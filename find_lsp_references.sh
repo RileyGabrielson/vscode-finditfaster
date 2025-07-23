@@ -19,9 +19,9 @@ fi
 
 # Run fzf on the references file
 # The format is: file:line:char:text
-PREVIEW_ENABLED=${FIND_WITHIN_FILES_PREVIEW_ENABLED:-1}
-PREVIEW_COMMAND=${FIND_WITHIN_FILES_PREVIEW_COMMAND:-'bat --decorations=always --color=always {1} --highlight-line {2} --style=header,grid'}
-PREVIEW_WINDOW=${FIND_WITHIN_FILES_PREVIEW_WINDOW_CONFIG:-'right:border-left:50%:+{2}+3/3:~3'}
+PREVIEW_ENABLED=${FIND_LSP_REFERENCES_PREVIEW_ENABLED:-1}
+PREVIEW_COMMAND=${FIND_LSP_REFERENCES_PREVIEW_COMMAND:-'bat --decorations=always --color=always {1} --highlight-line {2} --style=header,grid'}
+PREVIEW_WINDOW=${FIND_LSP_REFERENCES_PREVIEW_WINDOW_CONFIG:-'right:border-left:50%:+{2}+3/3:~3'}
 
 PREVIEW_STR=()
 if [[ "$PREVIEW_ENABLED" -eq 1 ]]; then
@@ -33,6 +33,7 @@ fi
 # -a: array
 IFS=: read -ra VAL < <(
     cat "$REFERENCES_FILE" | fzf --ansi \
+        --keep-right \
         --cycle \
         --delimiter : \
         ${PREVIEW_STR[@]+"${PREVIEW_STR[@]}"} \
