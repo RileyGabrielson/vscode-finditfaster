@@ -81,6 +81,12 @@ const commands: { [key: string]: Command } = {
         preRunCallback: undefined,
         postRunCallback: undefined,
     },
+    findChangedFiles: {
+        script: 'find_changed_files',
+        uri: undefined,
+        preRunCallback: undefined,
+        postRunCallback: undefined,
+    },
 };
 
 type WhenCondition = 'always' | 'never' | 'noWorkspaceOnly';
@@ -184,6 +190,9 @@ interface Config {
     findLspReferencesPreviewEnabled: boolean,
     findLspReferencesPreviewCommand: string,
     findLspReferencesPreviewWindowConfig: string,
+    findChangedFilesPreviewEnabled: boolean,
+    findChangedFilesPreviewCommand: string,
+    findChangedFilesPreviewWindowConfig: string,
     findWithinFilesFilter: Set<string>,
     workspaceSettings: {
         folders: string[],
@@ -232,6 +241,9 @@ const CFG: Config = {
     findLspReferencesPreviewEnabled: true,
     findLspReferencesPreviewCommand: '',
     findLspReferencesPreviewWindowConfig: '',
+    findChangedFilesPreviewEnabled: true,
+    findChangedFilesPreviewCommand: '',
+    findChangedFilesPreviewWindowConfig: '',
     findWithinFilesFilter: new Set(),
     workspaceSettings: {
         folders: [],
@@ -284,6 +296,7 @@ function setupConfig(context: vscode.ExtensionContext) {
     commands.listSearchLocations.uri = localScript(commands.listSearchLocations.script);
     commands.flightCheck.uri = localScript(commands.flightCheck.script);
     commands.findLspReferences.uri = localScript(commands.findLspReferences.script);
+    commands.findChangedFiles.uri = localScript(commands.findChangedFiles.script);
 }
 
 /** Register the commands we defined with VS Code so users have access to them */
@@ -358,6 +371,9 @@ function updateConfigWithUserSettings() {
     CFG.findLspReferencesPreviewEnabled = getCFG('findLspReferences.showPreview');
     CFG.findLspReferencesPreviewCommand = getCFG('findLspReferences.previewCommand');
     CFG.findLspReferencesPreviewWindowConfig = getCFG('findLspReferences.previewWindowConfig');
+    CFG.findChangedFilesPreviewEnabled = getCFG('findChangedFiles.showPreview');
+    CFG.findChangedFilesPreviewCommand = getCFG('findChangedFiles.previewCommand');
+    CFG.findChangedFilesPreviewWindowConfig = getCFG('findChangedFiles.previewWindowConfig');
     CFG.fuzzRipgrepQuery = getCFG('findWithinFiles.fuzzRipgrepQuery');
     CFG.restoreFocusTerminal = getCFG('general.restoreFocusTerminal');
     CFG.useTerminalInEditor = getCFG('general.useTerminalInEditor');
@@ -709,6 +725,9 @@ function createTerminal() {
             FIND_LSP_REFERENCES_PREVIEW_ENABLED: CFG.findLspReferencesPreviewEnabled ? '1' : '0',
             FIND_LSP_REFERENCES_PREVIEW_COMMAND: CFG.findLspReferencesPreviewCommand,
             FIND_LSP_REFERENCES_PREVIEW_WINDOW_CONFIG: CFG.findLspReferencesPreviewWindowConfig,
+            FIND_CHANGED_FILES_PREVIEW_ENABLED: CFG.findChangedFilesPreviewEnabled ? '1' : '0',
+            FIND_CHANGED_FILES_PREVIEW_COMMAND: CFG.findChangedFilesPreviewCommand,
+            FIND_CHANGED_FILES_PREVIEW_WINDOW_CONFIG: CFG.findChangedFilesPreviewWindowConfig,
             USE_GITIGNORE: CFG.useGitIgnoreExcludes ? '1' : '0',
             GLOBS: CFG.useWorkspaceSearchExcludes ? getIgnoreString() : '',
             CANARY_FILE: CFG.canaryFile,

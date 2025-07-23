@@ -37,7 +37,8 @@
     "onCommand:find-it-faster.findWithinFiles",
     "onCommand:find-it-faster.findWithinFilesWithType",
     "onCommand:find-it-faster.listSearchLocations",
-    "onCommand:find-it-faster.findLspReferences"
+    "onCommand:find-it-faster.findLspReferences",
+    "onCommand:find-it-faster.findChangedFiles"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -69,6 +70,10 @@
       {
         "command": "find-it-faster.findLspReferences",
         "title": "Find It Faster: find LSP references"
+      },
+      {
+        "command": "find-it-faster.findChangedFiles",
+        "title": "Find It Faster: find changed files"
       }
     ],
     "keybindings": [
@@ -91,6 +96,11 @@
         "command": "find-it-faster.findLspReferences",
         "mac": "cmd+shift+r",
         "linux": "ctrl+shift+r"
+      },
+      {
+        "command": "find-it-faster.findChangedFiles",
+        "mac": "cmd+shift+d",
+        "linux": "ctrl+shift+d"
       }
     ],
     "configuration": {
@@ -223,6 +233,21 @@
         },
         "find-it-faster.findLspReferences.previewWindowConfig": {
           "markdownDescription": "When populated: Used by `fzf` to determine position and look of the preview window. See the `fzf` documentation. Example for a horizontal split: `top,50%,border-bottom,+{2}+3/3,~3`.",
+          "type": "string",
+          "default": ""
+        },
+        "find-it-faster.findChangedFiles.showPreview": {
+          "markdownDescription": "Show a preview window when searching changed files",
+          "type": "boolean",
+          "default": true
+        },
+        "find-it-faster.findChangedFiles.previewCommand": {
+          "markdownDescription": "When populated: Used by `fzf` to produce the preview when searching changed files. Use `{}` to indicate the filename. Example: `git diff --color=always {}`.",
+          "type": "string",
+          "default": ""
+        },
+        "find-it-faster.findChangedFiles.previewWindowConfig": {
+          "markdownDescription": "When populated: Used by `fzf` to determine position and look of the preview window. See the `fzf` documentation. Example for a horizontal split: `right:50%:border-left`.",
           "type": "string",
           "default": ""
         },
